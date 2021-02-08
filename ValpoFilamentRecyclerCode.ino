@@ -1,8 +1,8 @@
 #define ALPHA_LIGHT 0.001
 #define EDGES_PER_REVOLUTION 6.0
-#define ALPHA_RPM 0.001
-
-const int PhotoIn = A0;
+#define ALPHA_RPM 0.2
+#define VERBOSE 1
+const int PhotoIn = A1;
 const int LED = 13;
 int State = 0;
 
@@ -28,6 +28,8 @@ void record_edge(){
   }else{
     unsigned long current_ms = millis();
     unsigned long period = current_ms - last_edge_found;
+    Serial.print(" Period ");
+    Serial.print(period);
     last_edge_found = current_ms;
     average_period = (ALPHA_RPM * (float)period) + (1.0 - ALPHA_RPM) * average_period;
   }
@@ -48,14 +50,39 @@ void setup() {
   Serial.begin(9600);
 }
 
-void loop() {
+#define WHITE_LINE 0
+#define BLACK_LINE 1
+#define UNKNOWN_LINE 2
+#define DEADZONE 20
+short last_reading = UNKNOWN_LINE;
+void update_taciometer(){
   State = analogRead(PhotoIn);
+     // Serial.println(State);
   set_average_light(State);
   int thres = get_average_light();
-  if (State > thres){
-    Serial.println("Black Line");
+  short new_state;
+  if (State > (thres + DEADZONE)){
+    //found a black Line
+    new_state = BLACK_LINE;
+  }else if (State < (thres - DEADZONE)){
+    //White Line
+    new_state = WHITE_LINE;
   }else{
-    Serial.println("White Line");   
+    return;
   }
-  
+  if ((new_state != last_reading) && (last_reading != UNKNOWN_LINE)){
+    record_edge();
+    if (new_state == WHITE_LINE){
+      Serial.print(" White Line");
+    }else{
+      Serial.print(" Black Line");      
+    }
+    Serial.print(" RPM: ");  
+    Serial.println(get_rpm());
+  }
+  last_reading = new_state;
+}
+
+void loop() {
+  update_taciometer();
 }
