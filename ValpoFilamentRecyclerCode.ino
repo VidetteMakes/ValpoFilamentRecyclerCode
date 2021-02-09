@@ -1,11 +1,15 @@
 #define ALPHA_LIGHT 0.001
 #define EDGES_PER_REVOLUTION 6.0
-#define ALPHA_RPM 0.2
+#define ALPHA_RPM 0.35
 #define VERBOSE 1
 const int PhotoIn = A1;
 const int LED = 13;
 int State = 0;
 
+int led_pin = 3; 
+int pot_pin = A0;
+int output;
+int led_value;
 
 float average_light = 0;
 
@@ -45,8 +49,9 @@ int get_rpm(){
 }
 
 void setup() {
+  TCCR2B = TCCR2B & B11111000 | B00000001;
+  pinMode(led_pin, OUTPUT);
   pinMode(PhotoIn, INPUT);
-  pinMode(LED, OUTPUT);
   Serial.begin(9600);
 }
 
@@ -81,8 +86,22 @@ void update_taciometer(){
     Serial.println(get_rpm());
   }
   last_reading = new_state;
+
 }
 
 void loop() {
   update_taciometer();
+
+  // speed controller
+
+  //Reading from potentiometer
+  output = analogRead(pot_pin);
+  //Serial.println(output);
+
+
+  //Mapping the Values between 0 to 255 because we can give output
+  //from 0 -255 using the analogwrite funtion
+  led_value = map(output, 0, 1023, 0, 255);
+  analogWrite(led_pin, led_value);
+  delay(5);
 }
