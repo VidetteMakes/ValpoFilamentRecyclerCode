@@ -2,6 +2,11 @@
 #define EDGES_PER_REVOLUTION 6.0
 #define ALPHA_RPM 0.35
 #define VERBOSE 1
+
+
+#include "Wire.h"
+#include "Adafruit_LiquidCrystal.h"
+
 const int PhotoIn = A1;
 const int LED = 13;
 int State = 0;
@@ -48,8 +53,21 @@ int get_rpm(){
   }
 }
 
+// Connect via i2c, default address #0 (A0-A2 not jumpered)
+Adafruit_LiquidCrystal lcd(0);
+
 void setup() {
-  TCCR2B = TCCR2B & B11111000 | B00000001;
+  // set up the LCD's number of rows and columns: 
+  lcd.begin(16, 2);
+  lcd.setBacklight(HIGH);
+   
+   // set the cursor to column 0, line 1
+  // (note: line 1 is the second row, since counting begins with 0):
+  lcd.setCursor(0, 0);
+  // print the number of seconds since reset:
+  lcd.print("RPM: ");
+
+  
   pinMode(led_pin, OUTPUT);
   pinMode(PhotoIn, INPUT);
   Serial.begin(9600);
@@ -86,7 +104,6 @@ void update_taciometer(){
     Serial.println(get_rpm());
   }
   last_reading = new_state;
-
 }
 
 void loop() {
@@ -103,5 +120,13 @@ void loop() {
   //from 0 -255 using the analogwrite funtion
   led_value = map(output, 0, 1023, 0, 255);
   analogWrite(led_pin, led_value);
-  delay(5);
+
+
+   // set the cursor to column 0, line 1
+  lcd.setCursor(5, 0);
+  lcd.print("    ");
+  
+   // set the cursor to column 0, line 1
+  lcd.setCursor(5, 0);
+  lcd.print(get_rpm());
 }
