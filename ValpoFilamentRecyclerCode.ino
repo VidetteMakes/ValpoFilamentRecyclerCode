@@ -53,6 +53,23 @@ int get_rpm(){
   }
 }
 
+const int buttonPin = 2;     // the number of the pushbutton pin
+const int motorPin =  7;      // the number of the LED pin
+
+void switchedOnISR() {
+  int val = digitalRead(buttonPin);
+  if  (val == 0){
+    // closed
+    Serial.println("Turning motor On");
+    digitalWrite(motorPin, HIGH); // sets the digital pin 13 on
+  }else{
+    // open
+    Serial.println("Turning motor Off");
+    digitalWrite(motorPin, LOW); // sets the digital pin 13 on
+  }  
+}
+
+
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
 Adafruit_LiquidCrystal lcd(0);
 
@@ -70,7 +87,14 @@ void setup() {
   
   pinMode(led_pin, OUTPUT);
   pinMode(PhotoIn, INPUT);
+  
   Serial.begin(9600);
+
+  
+  pinMode(buttonPin, INPUT_PULLUP);
+  pinMode(motorPin, OUTPUT);    // sets the digital pin 13 as output
+  attachInterrupt(digitalPinToInterrupt(buttonPin), switchedOnISR, CHANGE );
+  switchedOnISR();
 }
 
 #define WHITE_LINE 0
