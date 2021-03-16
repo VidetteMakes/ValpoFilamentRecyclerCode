@@ -3,7 +3,11 @@
 #define ALPHA_RPM 0.35
 #define VERBOSE 1
 
+#define  DIAL_CLK_PIN    4 //yellow
+#define  DIAL_DATA_PIN   5 //white
 
+
+#include "data_process.h"
 #include "Wire.h"
 #include "Adafruit_LiquidCrystal.h"
 
@@ -68,6 +72,9 @@ void setup() {
   lcd.print("RPM: ");
 
   
+  CaliperSetup(DIAL_CLK_PIN,DIAL_DATA_PIN);
+
+  
   pinMode(led_pin, OUTPUT);
   pinMode(PhotoIn, INPUT);
   Serial.begin(9600);
@@ -121,6 +128,9 @@ void loop() {
   led_value = map(output, 0, 1023, 0, 255);
   analogWrite(led_pin, led_value);
 
+
+  CaliperLoop();
+  Serial.println(getCaliperValue());
 
    // set the cursor to column 0, line 1
   lcd.setCursor(5, 0);
