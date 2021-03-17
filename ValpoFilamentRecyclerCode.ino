@@ -129,8 +129,10 @@ void loop() {
   analogWrite(led_pin, led_value);
 
 
-  CaliperLoop();
-  Serial.println(getCaliperValue());
+  long CaliperValueMain = CaliperLoop();
+  if (CaliperValueMain != -1){
+    Serial.println(CaliperValueMain);
+  }
 
    // set the cursor to column 0, line 1
   lcd.setCursor(5, 0);

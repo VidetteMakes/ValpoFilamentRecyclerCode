@@ -6,9 +6,9 @@ bool b_CLK_IS     = 0;
 bool b_CLK_WAS    = 0;
 bool b_DATA_IS    = 0;
 
-#define  	INDEX_MAX  		23
-#define  	INDEX_DIGITS  	15
-#define		MAX_READ_OUT  	25832
+#define    INDEX_MAX     23
+#define   INDEX_DIGITS    15
+#define   MAX_READ_OUT    25832
 
 bool Buffer[INDEX_MAX];
 
@@ -24,6 +24,5 @@ long  ReadOut = 0;
 int dialClkPin = 0;
 int dialDataPin = 0;
 
-long CaliperValue = -1;
 
 #endif
