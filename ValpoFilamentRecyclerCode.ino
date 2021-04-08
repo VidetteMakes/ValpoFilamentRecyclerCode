@@ -61,6 +61,7 @@ int get_rpm(){
 Adafruit_LiquidCrystal lcd(0);
 
 void setup() {
+  pinMode(13, OUTPUT);    // sets the digital pin 13 as output
   // set up the LCD's number of rows and columns: 
   lcd.begin(16, 2);
   lcd.setBacklight(HIGH);
@@ -127,6 +128,11 @@ void loop() {
   //from 0 -255 using the analogwrite funtion
   led_value = map(output, 0, 1023, 0, 255);
   analogWrite(led_pin, led_value);
+  if (led_value ==0){
+    digitalWrite(13, LOW);
+  }else{
+    digitalWrite(13, HIGH);
+  }
 
 
   long CaliperValueMain = CaliperLoop();
