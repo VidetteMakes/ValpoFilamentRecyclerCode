@@ -3,8 +3,8 @@
 #define ALPHA_RPM 0.35
 #define VERBOSE 1
 
-#define  DIAL_CLK_PIN    4 //yellow
-#define  DIAL_DATA_PIN   5 //white
+#define  DIAL_CLK_PIN    6 //yellow
+#define  DIAL_DATA_PIN   7 //white
 
 
 #include "data_process.h"
@@ -78,7 +78,7 @@ void setup() {
   
   pinMode(led_pin, OUTPUT);
   pinMode(PhotoIn, INPUT);
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 #define WHITE_LINE 0
@@ -128,6 +128,7 @@ void loop() {
   //from 0 -255 using the analogwrite funtion
   led_value = map(output, 0, 1023, 0, 255);
   analogWrite(led_pin, led_value);
+
   if (led_value ==0){
     digitalWrite(13, LOW);
   }else{
@@ -139,7 +140,7 @@ void loop() {
   if (CaliperValueMain != -1){
     Serial.println(CaliperValueMain);
   }
-
+/*
    // set the cursor to column 0, line 1
   lcd.setCursor(5, 0);
   lcd.print("    ");
@@ -147,4 +148,5 @@ void loop() {
    // set the cursor to column 0, line 1
   lcd.setCursor(5, 0);
   lcd.print(get_rpm());
+  */
 }
