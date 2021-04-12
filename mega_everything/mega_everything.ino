@@ -1,5 +1,5 @@
 #define ALPHA_LIGHT 0.001
-#define EDGES_PER_REVOLUTION 6.0
+#define BLACK_LINES_PER_REVOLUTION 3.0
 #define ALPHA_RPM 0.35
 #define VERBOSE 1
 
@@ -86,7 +86,7 @@ int get_rpm(){
   if (average_period == 0) {
     return 0;
   }else{
-    return (int) (60000.0/(average_period * EDGES_PER_REVOLUTION));
+    return (int) (60000.0/(average_period * BLACK_LINES_PER_REVOLUTION));
   }
 }
 
@@ -149,10 +149,10 @@ void update_taciometer(){
     return;
   }
   if ((new_state != last_reading) && (last_reading != UNKNOWN_LINE)){
-    record_edge();
     if (new_state == WHITE_LINE){
       Serial.print(" White Line");
     }else{
+      record_edge();
       Serial.print(" Black Line");      
     }
     Serial.print(" RPM: ");  
@@ -203,20 +203,18 @@ void loop() {
      rollerIn = rpm ;
 
      
-     Serial.print("RPM: ");
+     rollerPID.Compute();
+     /*Serial.print("RPM: ");
      Serial.print(rpm);
      
      Serial.print(" rollerIn: ");
      Serial.print(rollerIn);
      Serial.print(" rollerSet: ");
      Serial.print(rollerSet);
-    
-  
-     rollerPID.Compute();
-
-     
       Serial.print(" rollerOut: ");
       Serial.println(rollerOut);
+     
+      */
   
 
     if (rollerSet < 0.1){
