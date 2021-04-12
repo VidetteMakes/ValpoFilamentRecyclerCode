@@ -5,48 +5,48 @@
 
 long  My_Power(int Base, int Power)
 {
-  {
-    // Method 1 (Using Nested Loops)
-    // We can calculate power by using repeated addition.
-    // For example to calculate 5^6.
-    // 1) First 5 times add 5, we get 25. (5^2)
-    // 2) Then 5 times add 25, we get 125. (5^3)
-    // 3) Then 5 time add 125, we get 625 (5^4)
-    // 4) Then 5 times add 625, we get 3125 (5^5)
-    // 5) Then 5 times add 3125, we get 15625 (5^6)
-    
-    if (Power == 0)
-    return 1; 
-    
-    long answer = Base;
-    long increment = Base;
-    int i, j;
-    for(i = 1; i < Power; i++)
-    {
-      for(j = 1; j < Base; j++)
-      {
-        answer += increment;
-      }
-      increment = answer;
-    }
-    return answer;
-  } 
+	{
+		// Method 1 (Using Nested Loops)
+		// We can calculate power by using repeated addition.
+		// For example to calculate 5^6.
+		// 1) First 5 times add 5, we get 25. (5^2)
+		// 2) Then 5 times add 25, we get 125. (5^3)
+		// 3) Then 5 time add 125, we get 625 (5^4)
+		// 4) Then 5 times add 625, we get 3125 (5^5)
+		// 5) Then 5 times add 3125, we get 15625 (5^6)
+		
+		if (Power == 0)
+		return 1;	
+		
+		long answer = Base;
+		long increment = Base;
+		int i, j;
+		for(i = 1; i < Power; i++)
+		{
+			for(j = 1; j < Base; j++)
+			{
+				answer += increment;
+			}
+			increment = answer;
+		}
+		return answer;
+	}	
 }//=============================================
 
 long  Buff2Decimal()
 {
-  long  result = 0;
-  
-  
-  for ( int i=0; i<=INDEX_DIGITS; i++ )
-  {
-    result = result + Buffer[i] * (long)My_Power(2,i);
-  }
-  
-  if ( Buffer[20] ) {Znak = -1;}
-  else        {Znak = +1;}
+	long  result = 0;
+	
+	
+	for ( int i=0; i<=INDEX_DIGITS; i++ )
+	{
+		result = result + Buffer[i] * (long)My_Power(2,i);
+	}
+	
+	if ( Buffer[20] )	{Znak = -1;}
+	else 				{Znak = +1;}
 
-  return Znak * result;
+	return Znak * result;
 }//=============================================
 
 
@@ -86,7 +86,6 @@ long CaliperLoop(){
       //###############################
       //Serial.println("Save");
       CaliperValue = Buff2Decimal();//to proceed the data in the buffer
-      Serial.println(CaliperValue);
       //###############################
       
       // to reset the buffer
