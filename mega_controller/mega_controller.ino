@@ -22,6 +22,8 @@ motor_ramp_up spoiler_motor;
 motor_ramp_up screw_motor;
 motor_ramp_up fan;
 
+bool has_been_reset = false;
+
 I2C_Controller i2c_controller;
 
 void setup() {
@@ -38,6 +40,7 @@ void setup() {
   setup_tachometer();
   
   i2c_controller.setup();
+  has_been_reset = false;
 }
 
 
@@ -50,7 +53,17 @@ void loop() {
   update_taciometer();
 
   int desired_screw_speed = map(i2c_controller.get_desired_screw_speed(),0,1023,0,255);
-  screw_motor.set_speed(desired_screw_speed);
+  if (has_been_reset){
+    screw_motor.set_speed(desired_screw_speed); 
+  }else{
+    screw_motor.set_speed(0); 
+    
+  }
+  if (desired_screw_speed<4){
+    //ensure motor is off on start up
+    has_been_reset = true;
+    
+  }
 
 
   int desired_spoiler_speed = map(i2c_controller.get_desired_spoiler_speed(),0,1023,0,255);
