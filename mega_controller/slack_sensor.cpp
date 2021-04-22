@@ -50,3 +50,35 @@ void slack_sensor::printData(){
   Serial.print(bottom_interrupt->get_average_light());
   Serial.print("\n");
 }
+
+/*
+An example use case of the slack sensor.
+
+#include "slack_sensor.h"
+
+const int top_slack_pin = A0;
+const int bottom_slack_pin = A2; 
+
+slack_sensor my_slack_sensor;
+
+
+void setup() {
+  my_slack_sensor.setup(top_slack_pin,bottom_slack_pin);
+
+}
+
+
+void loop() {
+
+
+  int slack_sensor_output = my_slack_sensor.loop();
+
+  if (slack_sensor_output == my_slack_sensor.HIT_BOTTOM){
+    //Hit bottom
+  }
+  else if (slack_sensor_output == my_slack_sensor.HIT_TOP){
+    //Hit Top
+  }
+
+}
+ */

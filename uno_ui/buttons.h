@@ -5,7 +5,7 @@
 #include "Adafruit_LiquidCrystal.h"
 
 
-int UIState = 0; // 0 = main menu, 1 = monitor temp and diameter, 2 = select presets, 3 = manual adjustment of temp and speed
+int UIState = 0; // 0 = main menu, 1 = monitor temp and diameter, 2 = select from presets, 3 = manual adjustment of screw speed, 4 = display preset instructions 
 int menuScroll;  // tracks position of "cursor" when selecting menu options
 
 // digital pinout for input buttons
@@ -14,14 +14,11 @@ int menuScroll;  // tracks position of "cursor" when selecting menu options
 #define buttonBot 9     // select
 #define buttonRight 8   // ???
 
-#define potPinL 1         // select the input pin for the left potentiometer
-#define potPinR 2         // select the input pin for the right potentiometer
+#define potPinL 0         // select the input pin for the left potentiometer
+#define potPinR 1         // select the input pin for the right potentiometer
 float valPotL = 0;        // variable to store the value coming from left sensor
 float valPotR = 0;        // variable to store the value coming from right sensor
-float diameterIn;         // diameter reading received from dial indicator
-int tempIn;               // temperature reading received from temp controller/thermocouple
-int tempOut = 0;          // temperature value being sent to the temperature controller
-byte speedOut = 0;        // speed value being send to the motor
+
 
 // Variables will change:
 int buttonStateLeft;              // the current reading from the input pin
@@ -35,9 +32,15 @@ unsigned long lastDebounceTimeLeft = 0;   // the last time the output pin was to
 unsigned long lastDebounceTimeBot = 0;    // the last time the output pin was toggled
 unsigned long debounceDelay = 50;         // the debounce time; increase if the output flickers
 
-byte MSB;
-byte LSB;
-short tempD;
+byte MSB;                 // contains most significant bit of diameter
+byte LSB;                 // contains least significant bit of diameter
+short tempD;              // temporary variable to hold diameter reading
+float diameterIn;         // diameter reading received from dial indicator
+static int speedOutScrew = 0;        // speed value being send to the motor
+static int speedOutSpoiler = 0;        // speed value being send to the motor
+
+#define plaTemp 200
+#define plaSpeed 14
 
 
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
@@ -47,16 +50,13 @@ void buttonSetup(){
   // set up the LCD's number of rows and columns: 
   lcd.begin(16, 2);
 
-  Wire.begin();        // join i2c bus (address optional for master)
 
   // initialize the pushbutton pins as inputs with pullup resistors:
   pinMode(buttonLeft, INPUT_PULLUP);
   pinMode(buttonBot, INPUT_PULLUP);
 
-  Serial.begin(9600);
 
 }
-
 
 
 void checkButton(){
@@ -145,20 +145,18 @@ void checkButton(){
             switch (menuScroll){
               case 2:
                 // lcd.print("[PLA] PETG ");
-                speedOut = 14;
-                tempOut = 220;
-                UIState = 1;
+                UIState = 4;
                 break;
               case 1:
                 // lcd.print(" PLA [PETG]");
-                UIState = 1;
+                UIState = 4;
                 break;
             }
             break;
           case 3: // manual control
-            Wire.beginTransmission(4);         // transmit to device 8
-            Wire.write(speedOut);              // sends one byte 
-            Wire.endTransmission();            // stop transmitting
+            //Wire.beginTransmission(4);         // transmit to device 8
+            //Wire.write(speedOutScrew);              // sends one byte 
+            //Wire.endTransmission();            // stop transmitting
 
             delay(100);
             break;
@@ -170,15 +168,28 @@ void checkButton(){
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonStateBot = readingBot;
+  
+
 
 }
 
 
+int getScrewSpeed(){
+  return speedOutScrew;
+}
 
+int getSpoilerSpeed(){
+  return speedOutSpoiler;
+}
 
 void UILoop(){
   valPotL = analogRead(potPinL);    // read the value from the sensor
   valPotR = analogRead(potPinR);    // read the value from the sensor
+
+  //not sure about this
+  speedOutScrew = valPotL;//map(valPotL,0,1023,255,0);
+  speedOutSpoiler = valPotR;//map(valPotR,0,1023,255,0);
+
 
   switch (UIState){
     case 0:         // Main Menu
@@ -227,7 +238,7 @@ void UILoop(){
       // lcd.print(" RPM");
 
       break;
-    case 2:          // presets for PLA and PETG (not implemented)
+    case 2:          // select presets for PLA and PETG (not implemented)
       lcd.setCursor(0, 0);
       lcd.print("PRESETS");
       
@@ -249,15 +260,37 @@ void UILoop(){
     case 3:         // manually adjust speed and temperature
       lcd.setCursor(0, 0);
   
-      speedOut = 14-14*(valPotL/1023);
+      speedOutScrew = valPotL;//map(valPotL,0,1023,255,0);
+      speedOutSpoiler = valPotR;//map(valPotR,0,1023,255,0);
       lcd.print("SPEED: ");
-      if(speedOut < 10){
+      if(speedOutScrew < 10){
         lcd.print(" ");
       }
-      lcd.print(speedOut);
+      lcd.print(speedOutScrew);
       lcd.print(" RPM");
     
       
+      break;
+    case 4:         // display preset instructions
+      lcd.setCursor(0,0);
+      switch (menuScroll){
+        case 2:
+          // lcd.print("[PLA] PETG ");
+          lcd.print("SET TEMP: ");
+          lcd.print(plaTemp);
+          lcd.print(" C");
+          lcd.setCursor(0,1);
+          lcd.print("SET SPD: ");
+          lcd.print(plaSpeed);
+          lcd.print(" RPM");
+          break;
+        case 1:
+          // lcd.print(" PLA [PETG]");
+          lcd.print("NOT YET");
+          lcd.setCursor(0,1);
+          lcd.print("IMPLEMENTED");
+          break;
+      }
       break;
   }
   
