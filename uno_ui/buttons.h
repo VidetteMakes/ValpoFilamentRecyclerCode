@@ -10,8 +10,8 @@ int menuScroll;  // tracks position of "cursor" when selecting menu options
 
 // digital pinout for input buttons
 #define buttonTop 11    // ???
-#define buttonLeft 10   // menu
-#define buttonBot 9     // select
+#define buttonLeft 6   // menu
+#define buttonBot 4    // select
 #define buttonRight 8   // ???
 
 #define potPinL 0         // select the input pin for the left potentiometer
