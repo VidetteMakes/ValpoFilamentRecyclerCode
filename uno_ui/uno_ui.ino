@@ -16,7 +16,7 @@ void sendI2C(){
   Wire.write(c1);              // sends one byte 
   Wire.write(c2);              // sends one byte 
 
-  data =  getSpoilerSpeed();
+  data =  getspoolerSpeed();
   c1 = data >> 8;
   c2 = data & 0x00ff;
   Wire.write(c1);              // sends one byte 
@@ -36,7 +36,7 @@ void setup() {
 void loop() {
   Serial.print(getScrewSpeed());
   Serial.print(" ");
-  Serial.println(getSpoilerSpeed());
+  Serial.println(getspoolerSpeed());
 
 
   UILoop(); 

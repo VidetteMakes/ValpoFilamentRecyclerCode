@@ -37,7 +37,7 @@ byte LSB;                 // contains least significant bit of diameter
 short tempD;              // temporary variable to hold diameter reading
 float diameterIn;         // diameter reading received from dial indicator
 static int speedOutScrew = 0;        // speed value being send to the motor
-static int speedOutSpoiler = 0;        // speed value being send to the motor
+static int speedOutspooler = 0;        // speed value being send to the motor
 
 #define plaTemp 200
 #define plaSpeed 14
@@ -178,8 +178,8 @@ int getScrewSpeed(){
   return speedOutScrew;
 }
 
-int getSpoilerSpeed(){
-  return speedOutSpoiler;
+int getspoolerSpeed(){
+  return speedOutspooler;
 }
 
 void UILoop(){
@@ -188,7 +188,7 @@ void UILoop(){
 
   //not sure about this
   speedOutScrew = valPotL;//map(valPotL,0,1023,255,0);
-  speedOutSpoiler = valPotR;//map(valPotR,0,1023,255,0);
+  speedOutspooler = valPotR;//map(valPotR,0,1023,255,0);
 
 
   switch (UIState){
@@ -261,7 +261,7 @@ void UILoop(){
       lcd.setCursor(0, 0);
   
       speedOutScrew = valPotL;//map(valPotL,0,1023,255,0);
-      speedOutSpoiler = valPotR;//map(valPotR,0,1023,255,0);
+      speedOutspooler = valPotR;//map(valPotR,0,1023,255,0);
       lcd.print("SPEED: ");
       if(speedOutScrew < 10){
         lcd.print(" ");

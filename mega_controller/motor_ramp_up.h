@@ -1,3 +1,9 @@
+/*
+ * 
+ * This code will slowly increase the speed of the motors 
+ * so that these is not too high a current throught the system
+ * 
+ */
 #ifndef MOTOR_RAMP_UP_H
 #define MOTOR_RAMP_UP_H
 
@@ -18,11 +24,12 @@ private:
     int motor_pin = 0;
 public:
     motor_ramp_up();
+    // define the pins. The ramp function will move `new_ramp_step` every `new_ramp_up_ms`
     void motor_ramp_up::setup(int new_motor_pin, int new_ramp_up_ms, int new_ramp_step);
     void motor_ramp_up::setup(int new_motor_pin);
-    void loop();
-    int get_speed(){return speed;}
-    void set_speed(int new_speed);
+    void loop();//call every loop
+    int get_speed(){return speed;}//get the current speed
+    void set_speed(int new_speed);//set the desired speed
 
 };
 

@@ -1,3 +1,10 @@
+/*
+ *
+ * This is used to read data from the dial caliper. 
+ * Just call setup and loop
+ * 
+ */
+
 #ifndef DATA_PROCESS_H
 #define DATA_PROCESS_H
 
@@ -49,7 +56,7 @@ long  Buff2Decimal()
 	return Znak * result;
 }//=============================================
 
-
+// setup the pins for the dial caliper
 void CaliperSetup( int clkPin, int dataPin){
   dialClkPin = clkPin;
   dialDataPin = dataPin;
@@ -62,7 +69,8 @@ void CaliperSetup( int clkPin, int dataPin){
 }
 
 
-
+// read the pin values and return the current value.
+// return -1 if a value is not found
 long CaliperLoop(){
   long CaliperValue = -1;
   b_CLK_IS  = digitalRead(dialClkPin);   // read the CLK pin

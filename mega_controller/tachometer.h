@@ -1,3 +1,9 @@
+/*
+ *
+ * This code caluclates the rpm of the barrel
+ * 
+ */
+
 #ifndef TACHOMETER_H
 #define TACHOMETER
 
@@ -34,6 +40,7 @@ void record_edge(){
   
 }
 
+// use this function to get rpm
 int get_rpm(){
   if (average_period == 0) {
     return 0;
@@ -42,13 +49,14 @@ int get_rpm(){
   }
 }
 
+// setup the pins
 void setup_tachometer(){
   
   pinMode(PhotoIn, INPUT);
   average_light = analogRead(PhotoIn);
 }
 
-
+// run an update and return the status
 #define WHITE_LINE 0
 #define BLACK_LINE 1
 #define UNKNOWN_LINE 2

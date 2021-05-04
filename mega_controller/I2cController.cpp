@@ -5,7 +5,7 @@
 
 I2C_Controller::I2C_Controller(){
   motorSpeedScrew = 0;
-  motorSpeedSpoiler = 0;
+  motorSpeedSpooler = 0;
 }
 
 void I2C_Controller::setup(){
@@ -17,7 +17,7 @@ void I2C_Controller::setup(){
 
 
 static int I2C_Controller::motorSpeedScrew = 0;
-static int I2C_Controller::motorSpeedSpoiler = 0;
+static int I2C_Controller::motorSpeedSpooler = 0;
 
 byte c1 = 0;
 
@@ -44,7 +44,7 @@ static void I2C_Controller::receiveEvent(int howMany){
     
     if (j == 3){
       
-       motorSpeedSpoiler = (int)(c1 << 8) + (int) data;
+       motorSpeedSpooler = (int)(c1 << 8) + (int) data;
     }
     
   }

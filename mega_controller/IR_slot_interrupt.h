@@ -1,3 +1,9 @@
+/*
+ * This is the code for the IR sensor
+ * It detects when there is filament in front of the sensor
+ * It uses a rolling average to detect whether is blocked or not
+ */
+
 #ifndef IR_SLOT_INTERRUPT_H
 #define IR_SLOT_INTERRUPT_H
 
@@ -16,9 +22,15 @@ private:
     
 public:
     IR_slot_interrupt();
+    
+    //set up the analog pin and buffer. The buffer is an positve offset to prevent false positives
     int setup(int setAnalogPin, int setbuffer);
-    int loop();
-    int get_value();
+
+    
+    int loop();//called every loop
+    int get_value();//return the current reading
+    
+    // return the threshold value for light. If it is greater than 0 there is filament in front of the sensor.
     int get_average_light();
 };
 
