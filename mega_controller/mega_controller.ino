@@ -39,7 +39,7 @@ void setup() {
   // Set up tachometer.
   setup_tachometer();
   
-  // Set up I2C bus (communicates with User Interface Module).
+  // Set up I2C bus (as slave).
   Wire.begin(I2C_ADDRESS);
   Wire.onReceive(receiveEvent);
 }
