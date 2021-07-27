@@ -9,36 +9,38 @@ float potVal = 0;
 int motorVal = 0;
 
 void setup() {
-  buttonSetup();
+	buttonSetup();
 
-  Wire.begin();        // join i2c bus (address optional for master)
+	// Set up I2C (as master).
+	Wire.begin();
 
-  Serial.begin(9600);
+	// Set up serial port.
+	Serial.begin(9600);
 }
 
 void loop() {
-  Serial.print(getScrewSpeed());
-  Serial.print(" ");
-  Serial.println(getspoolerSpeed());
-  
-  UILoop();
-  
-  sendI2C();
+	Serial.print(getScrewSpeed());
+	Serial.print(" ");
+	Serial.println(getspoolerSpeed());
+
+	UILoop();
+
+	sendI2C();
 }
 
 void sendI2C(){
-  Wire.beginTransmission(8);         // transmit to device 8
-  int data = getScrewSpeed();
-  char c1 = data >> 8;
-  char c2 = data & 0x00ff;
-  Wire.write(c1);              // sends one byte
-  Wire.write(c2);              // sends one byte
+	Wire.beginTransmission(8);         // transmit to device 8
+	int data = getScrewSpeed();
+	char c1 = data >> 8;
+	char c2 = data & 0x00ff;
+	Wire.write(c1);              // sends one byte
+	Wire.write(c2);              // sends one byte
 
-  data = getspoolerSpeed();
-  c1 = data >> 8;
-  c2 = data & 0x00ff;
-  Wire.write(c1);              // sends one byte
-  Wire.write(c2);              // sends one byte
-  
-  Wire.endTransmission();            // stop transmitting 
+	data = getspoolerSpeed();
+	c1 = data >> 8;
+	c2 = data & 0x00ff;
+	Wire.write(c1);              // sends one byte
+	Wire.write(c2);              // sends one byte
+
+	Wire.endTransmission();            // stop transmitting 
 }
