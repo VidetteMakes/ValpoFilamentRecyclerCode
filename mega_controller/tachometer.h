@@ -51,7 +51,6 @@ int get_rpm(){
 
 // setup the pins
 void setup_tachometer(){
-  
   pinMode(PhotoIn, INPUT);
   average_light = analogRead(PhotoIn);
 }
@@ -69,21 +68,15 @@ void update_taciometer(){
   int thres = get_average_light();
   short new_state;
 
+#if (VERBOSE == 6)
+  Serial.print("Current Reading: ");  
+  Serial.print(State);
+  Serial.print(" Average Value: ");  
+  Serial.print(thres);
+  Serial.print(" RPM: ");  
+  Serial.println(get_rpm());
+#endif
 
-
-
-  #if (VERBOSE == 6)
-      Serial.print("Current Reading: ");  
-      Serial.print(State);
-      Serial.print(" Average Value: ");  
-      Serial.print(thres);
-      Serial.print(" RPM: ");  
-      Serial.println(get_rpm());
-  #endif
-
-
-
-  
   if (State > (thres + DEADZONE)){
     //found a black Line
     new_state = BLACK_LINE;
@@ -94,36 +87,31 @@ void update_taciometer(){
     return;
   }
 
-  
   if ((new_state != last_reading) && (last_reading != UNKNOWN_LINE)){
     if (new_state == WHITE_LINE){
-      
-   #if (VERBOSE == 5)
+#if (VERBOSE == 5)
       Serial.print(" White Line");  
-   #endif
-         
-   #if (VERBOSE == 6)
+#endif
+	 
+#if (VERBOSE == 6)
       Serial.print(" White Line");  
-   #endif
+#endif
     }else{
       record_edge();
       
-   #if (VERBOSE == 5)
+#if (VERBOSE == 5)
       Serial.print(" Black Line");  
-   #endif           
-   #if (VERBOSE == 6)
+#endif           
+#if (VERBOSE == 6)
       Serial.print(" Black Line");  
-   #endif
+#endif
     }
-  #if (VERBOSE == 5)
-      Serial.print(" RPM: ");  
-      Serial.println(get_rpm());
-  #endif
+#if (VERBOSE == 5)
+    Serial.print(" RPM: ");  
+    Serial.println(get_rpm());
+#endif
   }
   last_reading = new_state;
-
-
-
 }
 
 #endif
