@@ -4,36 +4,41 @@
 #include "Wire.h"
 #include "Adafruit_LiquidCrystal.h"
 
+// 0 = main menu
+// 1 = monitor temp and diameter
+// 2 = select from presets
+// 3 = manual adjustment of screw speed
+// 4 = display preset instructions 
+int UIState = 0;
 
-int UIState = 0; // 0 = main menu, 1 = monitor temp and diameter, 2 = select from presets, 3 = manual adjustment of screw speed, 4 = display preset instructions 
-int menuScroll;  // tracks position of "cursor" when selecting menu options
+// tracks position of "cursor" when selecting menu options
+int menuScroll;
 
 // digital pinout for input buttons
-#define buttonTop 11    // ???
-#define buttonLeft 6   // menu
-#define buttonBot 4    // select
-#define buttonRight 8   // ???
+const int PIN_BUTTON_UP = 11;
+const int PIN_BUTTON_LEFT = 6;
+const int PIN_BUTTON_DOWN = 4;
+const int PIN_BUTTON_RIGHT = 8;
+const int PIN_POT_LEFT = 0;		// left potentiometer
+const int PIN_POT_RIGHT = 1;	// right potentiometer
 
-#define potPinL 0         // select the input pin for the left potentiometer
-#define potPinR 1         // select the input pin for the right potentiometer
-float valPotL = 0;        // variable to store the value coming from left sensor
-float valPotR = 0;        // variable to store the value coming from right sensor
+// left potentiometer's value
+float valPotL = 0;
 
+// right potentiometer's value
+float valPotR = 0;
 
-// Variables will change:
-int buttonStateLeft;              // the current reading from the input pin
-int lastButtonStateLeft = LOW;    // the previous reading from the input pin
-int buttonStateBot;               // the current reading from the input pin
-int lastButtonStateBot = LOW;     // the previous reading from the input pin
+// button debouncing variables
+int buttonStateLeft;						// the current reading from the input pin
+int lastButtonStateLeft = LOW;				// the previous reading from the input pin
+int buttonStateBot;							// the current reading from the input pin
+int lastButtonStateBot = LOW;				// the previous reading from the input pin
+unsigned long lastDebounceTimeLeft = 0;		// the last time the output pin was toggled
+unsigned long lastDebounceTimeBot = 0;		// the last time the output pin was toggled
+unsigned long debounceDelay = 50;			// the debounce time; increase if the output flickers
 
-// the following variables are unsigned longs because the time, measured in
-// milliseconds, will quickly become a bigger number than can be stored in an int.
-unsigned long lastDebounceTimeLeft = 0;   // the last time the output pin was toggled
-unsigned long lastDebounceTimeBot = 0;    // the last time the output pin was toggled
-unsigned long debounceDelay = 50;         // the debounce time; increase if the output flickers
-
-byte MSB;                 // contains most significant bit of diameter
-byte LSB;                 // contains least significant bit of diameter
+byte MSB;                 // contains most significant byte of diameter
+byte LSB;                 // contains least significant byte of diameter
 short tempD;              // temporary variable to hold diameter reading
 float diameterIn;         // diameter reading received from dial indicator
 static int speedOutScrew = 0;        // speed value being send to the motor
@@ -42,48 +47,43 @@ static int speedOutspooler = 0;        // speed value being send to the motor
 #define plaTemp 200
 #define plaSpeed 14
 
-
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
 Adafruit_LiquidCrystal lcd(0);
 
 void buttonSetup(){
-  // set up the LCD's number of rows and columns: 
+  // Set up the LCD's number of rows and columns.
   lcd.begin(16, 2);
 
-
-  // initialize the pushbutton pins as inputs with pullup resistors:
-  pinMode(buttonLeft, INPUT_PULLUP);
-  pinMode(buttonBot, INPUT_PULLUP);
-
-
+  // Initialize the pushbutton pins as inputs with pullup resistors.
+  pinMode(PIN_BUTTON_LEFT, INPUT_PULLUP);
+  pinMode(PIN_BUTTON_DOWN, INPUT_PULLUP);
 }
 
 
 void checkButton(){
-
   /***********************************LEFT BUTTON**************************************/
   
-  // read the state of the switch into a local variable:
-  int readingLeft = digitalRead(buttonLeft);
-  // check to see if you just pressed the button
+  // Read the state of the switch into a local variable.
+  int readingLeft = digitalRead(PIN_BUTTON_LEFT);
+  // Check to see if you just pressed the button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
-  // since the last press to ignore any noise:
+  // since the last press to ignore any noise.
 
-  // If the switch changed, due to noise or pressing:
+  // If the switch changed, due to noise or pressing...
   if (readingLeft != lastButtonStateLeft) {
-    // reset the debouncing timer
+    // Reset the debouncing timer.
     lastDebounceTimeLeft = millis();
   }
 
   if ((millis() - lastDebounceTimeLeft) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+    // Whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state.
 
-    // if the button state has changed:
+    // If the button state has changed...
     if (readingLeft != buttonStateLeft) {
       buttonStateLeft = readingLeft;
 
-      // only toggle the LED if the new button state is HIGH
+      // If the new button state is HIGH...
       if (buttonStateLeft == HIGH) {
         UIState = 0;
         lcd.clear();
@@ -91,35 +91,33 @@ void checkButton(){
     }
   }
 
-  // save the reading. Next time through the loop, it'll be the lastButtonState:
+  // Save the reading. Next time through the loop, it'll be the lastButtonState.
   lastButtonStateLeft = readingLeft;
-
-
 
 
   /***********************************BOTTOM BUTTON**************************************/
   
-  // read the state of the switch into a local variable:
-  int readingBot = digitalRead(buttonBot);
-  // check to see if you just pressed the button
+  // Read the state of the switch into a local variable.
+  int readingBot = digitalRead(PIN_BUTTON_DOWN);
+  // Check to see if you just pressed the button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
   // since the last press to ignore any noise:
 
-  // If the switch changed, due to noise or pressing:
+  // If the switch changed, due to noise or pressing...
   if (readingBot != lastButtonStateBot) {
     // reset the debouncing timer
     lastDebounceTimeBot = millis();
   }
 
   if ((millis() - lastDebounceTimeBot) > debounceDelay) {
-    // whatever the reading is at, it's been there for longer than the debounce
-    // delay, so take it as the actual current state:
+    // Whatever the reading is at, it's been there for longer than the debounce
+    // delay, so take it as the actual current state.
 
-    // if the button state has changed:
+    // If the button state has changed...
     if (readingBot != buttonStateBot) {
       buttonStateBot = readingBot;
 
-      // only toggle the LED if the new button state is HIGH
+      // If the new button state is HIGH...
       if (buttonStateBot == HIGH) {
         switch (UIState){
           case 0: // main menu
@@ -155,7 +153,7 @@ void checkButton(){
             break;
           case 3: // manual control
             //Wire.beginTransmission(4);         // transmit to device 8
-            //Wire.write(speedOutScrew);              // sends one byte 
+            //Wire.write(speedOutScrew);         // sends one byte
             //Wire.endTransmission();            // stop transmitting
 
             delay(100);
@@ -168,9 +166,6 @@ void checkButton(){
 
   // save the reading. Next time through the loop, it'll be the lastButtonState:
   lastButtonStateBot = readingBot;
-  
-
-
 }
 
 
@@ -183,8 +178,8 @@ int getspoolerSpeed(){
 }
 
 void UILoop(){
-  valPotL = analogRead(potPinL);    // read the value from the sensor
-  valPotR = analogRead(potPinR);    // read the value from the sensor
+  valPotL = analogRead(PIN_POT_LEFT);    // read the value from the sensor
+  valPotR = analogRead(PIN_POT_RIGHT);    // read the value from the sensor
 
   //not sure about this
   speedOutScrew = valPotL;//map(valPotL,0,1023,255,0);
