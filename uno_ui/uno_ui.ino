@@ -10,7 +10,7 @@ const int PIN_POT_RIGHT = 1;			// right potentiometer
 float valPotL = 0;						// left potentiometer's value
 float valPotR = 0;						// right potentiometer's value
 static int speedScrew = 0;				// desired screw motor speed
-static int speedSpooler = 0;			// desired spooler motor speed
+static int speedSpool = 0;				// desired spooler motor speed
 
 // Connect via i2c, default address #0 (A0-A2 not jumpered)
 Adafruit_LiquidCrystal lcd(0);
@@ -18,6 +18,12 @@ Adafruit_LiquidCrystal lcd(0);
 void setup() {
 	// Set up the LCD's number of rows and columns.
 	lcd.begin(16, 2);
+
+  // Print placeholding text on the display.
+  lcd.setCursor(0, 0);
+  lcd.print("SCREW:       RPM");
+  lcd.setCursor(0, 1);
+  lcd.print("SPOOL:       RPM");
 
 	// Initialize the pushbutton pins as inputs with pullup resistors.
 	pinMode(PIN_BUTTON_LEFT, INPUT_PULLUP);
@@ -31,33 +37,50 @@ void setup() {
 }
 
 void loop() {
-	Serial.print(speedScrew);
-	Serial.print(" ");
-	Serial.println(speedSpooler);
-
 	// Read potentiometer values.
 	valPotL = analogRead(PIN_POT_LEFT);
 	valPotR = analogRead(PIN_POT_RIGHT);
 
 	// Convert to PWM values.
-	speedScrew = valPotL;//map(valPotL,0,1023,255,0);
-	speedSpooler = valPotR;//map(valPotR,0,1023,255,0);
+	speedScrew = map(valPotL, 0, 1023, 0, 14);
+	speedSpool = valPotR;//map(valPotR,0,1023,255,0);
 
 	// Print settings on LCD display.
-	lcd.setCursor(0, 0);
-	lcd.print("SPEED: ");
-	if(speedScrew < 10){
-		lcd.print(" ");
-	}
-	lcd.print(speedScrew);
-	lcd.print(" RPM");
+  UpdateDisplay(0, speedScrew);
+  UpdateDisplay(1, speedSpool);
 
 	checkButton();
+
+  // Send speed data over serial port.
+  Serial.print(speedScrew);
+	Serial.print(" ");
+	Serial.println(speedSpool);
 	
+  // Send speed data over I2C (to controller module).
 	sendI2C();
+
+  // Pause for effect.
+  delay(100);
 }
 
-void sendI2C(){
+// Print settings on LCD display.
+void UpdateDisplay(int row, int number) {
+  lcd.setCursor(7, row);
+	if (number < 10) {
+    lcd.print("   ");
+  }
+  else if (number < 100) {
+    lcd.print("  ");
+  }
+  else if (number < 1000) {
+    lcd.print(" ");
+  }
+
+	lcd.print(number);
+}
+
+// Send speed data over I2C (to controller module).
+void sendI2C() {
 	Wire.beginTransmission(I2C_ADDR_CONTROLLER);
 	
 	// Send the desired screw speed.
@@ -68,14 +91,13 @@ void sendI2C(){
 	Wire.write(c2);              // sends one byte
 
 	// Send the desired spooler speed.
-	data = speedSpooler;
+	data = speedSpool;
 	c1 = data >> 8;
 	c2 = data & 0x00ff;
 	Wire.write(c1);              // sends one byte
 	Wire.write(c2);              // sends one byte
 	
-	// Send the desired fan speed.
-	data = 
+	// TODO:  Send the desired fan speed.
 
 	Wire.endTransmission();            // stop transmitting 
 }
