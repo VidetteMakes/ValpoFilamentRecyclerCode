@@ -38,15 +38,11 @@ void setup() {
 
 void loop() {
 	// Read potentiometer values.
-	valPotL = analogRead(PIN_POT_LEFT);
-	valPotR = analogRead(PIN_POT_RIGHT);
+	speedScrew = analogRead(PIN_POT_LEFT);
+	speedSpool = analogRead(PIN_POT_RIGHT);
 
-	// Convert to PWM values.
-	speedScrew = map(valPotL, 0, 1023, 0, 14);
-	speedSpool = valPotR;//map(valPotR,0,1023,255,0);
-
-	// Print settings on LCD display.
-  UpdateDisplay(0, speedScrew);
+	// Print settings on LCD display (converting to RPM when able).
+  UpdateDisplay(0, map(speedScrew, 0, 1023, 0, 14));
   UpdateDisplay(1, speedSpool);
 
 	checkButton();

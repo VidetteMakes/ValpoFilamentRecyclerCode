@@ -12,9 +12,6 @@ void motor_ramp_up::setup(int pin, int rampTime, int rampStep) {
     motorPin = pin;
     motorRampTime = rampTime;
     motorRampStep = rampStep;
-	
-	// Set motor pin as output.
-    pinMode(motorPin, OUTPUT);
 }
 
 void motor_ramp_up::loop() {
