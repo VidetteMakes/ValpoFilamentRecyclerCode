@@ -14,6 +14,9 @@ const int C3 = 9;						// pin for keypad column 3
 
 #include "keypad_config.h"				// leave after pin definitions
 
+const int LCD_COL_FANS = 0;				// location of fan speed
+const int LCD_COL_SPOOL = 11;			// location of spool speed
+
 static int speedFans = 0;				// desired fan speed
 static int speedSpool = 0;				// desired spooler speed
 
@@ -39,8 +42,8 @@ void setup() {
 	lcd.print("FANS       SPOOL");
 
 	// Print settings.
-	PrintSetting(speedFans, 0, 1);
-	PrintSetting(speedSpool, 10, 1);
+	PrintSetting(speedFans, LCD_COL_FANS, 1);
+	PrintSetting(speedSpool, LCD_COL_SPOOL, 1);
 }
 
 // Over and over...
@@ -59,20 +62,20 @@ void loop() {
 			// If button 1 is pressed...
 			case '1':
 				// Increase fan speed.
-				AdjustSetting(&speedFans, 1, 0, 1);
+				AdjustSetting(&speedFans, 1, LCD_COL_FANS, 1);
 				break;
 			// If button 2 is pressed...
 			case '2':
 				// Decrease fan speed.
-				AdjustSetting(&speedFans, -1, 0, 1);
+				AdjustSetting(&speedFans, -1, LCD_COL_FANS, 1);
 				break;
 			case '3':
 				// Increase spool speed.
-				AdjustSetting(&speedSpool, 1, 10, 1);
+				AdjustSetting(&speedSpool, 1, LCD_COL_SPOOL, 1);
 				break;
 			case '4':
 				// Decrease spool speed.
-				AdjustSetting(&speedSpool, -1, 10, 1);
+				AdjustSetting(&speedSpool, -1, LCD_COL_SPOOL, 1);
 				break;
 			}
 		}
@@ -95,6 +98,7 @@ void PrintSetting(int setting, int column, int row) {
 	lcd.setCursor(column, row);
 	lcd.print("    ");
 
+	// Print number.
 	lcd.setCursor(column, row);
 	lcd.print(setting);
 }
