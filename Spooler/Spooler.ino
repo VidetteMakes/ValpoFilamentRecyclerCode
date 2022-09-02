@@ -52,7 +52,7 @@ void setup() {
 
 	// Print settings.
 	AdjustSetting(PIN_MOTOR_FANS, &speedFans, 0, LCD_COL_FANS, 1);
-	AdjustSetting(PIN_MOTOR_SPOOL, &speedSpool, -1, LCD_COL_SPOOL, 1);
+	AdjustSetting(PIN_MOTOR_SPOOL, &speedSpool, 0, LCD_COL_SPOOL, 1);
 }
 
 // Over and over...
