@@ -31,7 +31,7 @@ void setup() {
 
 	// Print placeholding text on the display.
 	lcd.setCursor(0, 0);
-	lcd.print("SCREW SPEED");
+	lcd.print("SPEED    Current");
 
 	// Print settings.
 	AdjustSetting(PIN_MOTOR_SCREW, &speed, 0, LCD_COL_SCREW, 1);
@@ -66,11 +66,13 @@ void AdjustSetting(int pin, int *setting, int adjustment, int column, int row) {
 	if (*setting > SPEED_MAX) { *setting = SPEED_MAX; }
 	else if (*setting < SPEED_MIN) { *setting = SPEED_MIN; }
 
+	int pwm = map(*setting, 0, SPEED_MAX, 0, 255);
+
 	// Update PWM (and scale appropriately).
-	analogWrite(pin, map(*setting, 0, SPEED_MAX, 0, 255));
+	analogWrite(pin, pwm);
 
 	// Print setting to serial port and LCD.
-	Serial.println(*setting);
+	Serial.println(pwm);
 
 	// Clear the display
 	lcd.setCursor(column, row);
