@@ -1,7 +1,13 @@
 #include "G2Motor.h"
 
+const int PIN_nSLEEP = 2;
+const int PIN_nFAULT = 6;
+const int PIN_DIR = 7;
+const int PIN_PWM = 9;
+const int PIN_CS = A0;
+
 // Initialize motor driver class (dependent on driver version).
-G2Motor18v18 md;
+G2Motor18v18 md = G2Motor18v18(PIN_nSLEEP, PIN_DIR, PIN_PWM, PIN_nFAULT, PIN_CS);
 
 void stopIfFault() {
 	if (md.getFault()) {
@@ -31,12 +37,11 @@ void loop()
 	delay(1);  // The driver requires a maximum of 1ms to elapse when brought out of sleep mode.
 
 	Serial.println("Starting");
-	Serial.println(i);
 	for (i = 0; i <= 400; i++)
 	{
 		md.setSpeed(i);
 		stopIfFault();
-		if (i%200 == 100)
+		if (i % 50 == 0)
 		{
 			Serial.print("Motor: speed = ");
 			Serial.print(i);
@@ -46,12 +51,11 @@ void loop()
 		delay(2);
 	}
 
-	Serial.println(i);
 	for (i = 400; i >= -400; i--)
 	{
 		md.setSpeed(i);
 		stopIfFault();
-		if (i%200 == 100)
+		if (i % 50 == 0)
 		{
 			Serial.print("Motor: speed = ");
 			Serial.print(i);
@@ -61,12 +65,11 @@ void loop()
 		delay(2);
 	}
 
-	Serial.println(i);
 	for (i = -400; i <= 0; i++)
 	{
 		md.setSpeed(i);
 		stopIfFault();
-		if (i%200 == 100)
+		if (i % 50 == 0)
 		{
 			Serial.print("Motor: speed = ");
 			Serial.print(i);
