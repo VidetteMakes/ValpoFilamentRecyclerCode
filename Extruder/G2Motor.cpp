@@ -32,8 +32,7 @@ void G2Motor::init()
 	pinMode(_DIR, OUTPUT);
 
 #ifdef G2MOTOR_TIMER1_AVAILABLE
-	if (_PWM == _PWM_TIMER1_PIN && _PWM == _PWM_TIMER1_PIN)
-	{
+	if (_PWM == _PWM_TIMER1_PIN && _PWM == _PWM_TIMER1_PIN) {
 		// Timer 1 configuration
 		// prescaler: clockI/O / 1
 		// outputs enabled
@@ -50,12 +49,10 @@ void G2Motor::init()
 }
 
 // Set speed for motor, speed is a number betwenn -400 and 400
-void G2Motor::setSpeed(int speed)
-{
+void G2Motor::setSpeed(int speed) {
 	unsigned char reverse = 0;
 
-	if (speed < 0)
-	{
+	if (speed < 0) {
 		speed = -speed;  // Make speed a positive quantity
 		reverse = 1;  // Preserve the direction
 	}

@@ -1,27 +1,46 @@
 // TODO:  Button press resets speed to zero.
-// TODO:  Implement new motor driver.
-// TODO:  Display motor current.
 
 // https://learn.adafruit.com/i2c-spi-lcd-backpack
 #include "Adafruit_LiquidCrystal.h"
 
+#include "G2Motor.h"
+
+// Pin definitions
 const int PIN_ENCODER_CLK = 2;			// rotary encoder pin
 const int PIN_ENCODER_DT = 3;			// rotary encoder pin
-const int PIN_MOTOR_SCREW = 5;			// PWM motor control
-const int LCD_COL_SCREW = 1;			// LCD motor speed location
+const int PIN_nSLEEP = 4;				// motor driver enable
+const int PIN_nFAULT = 6;				// motor fault detection
+const int PIN_DIR = 7;					// motor direction control
+const int PIN_PWM = 9;					// motor speed control
+const int PIN_CS = A0;					// motor current measurement
+
+const int LCD_COL_SPEED = 1;			// LCD motor speed location
+const int LCD_COL_CURRENT = 9;			// LCD current location
 const int SPEED_MIN = -12;				// min allowed speed (reverse)
 const int SPEED_MAX = 12;				// max allowed speed (forward)
 
 static int speed = 0;					// desired motor speed
 volatile int change = 0;				// rotary encoder change
+unsigned long timestamp = 0;			// used for scheduling
 
 // Initialize display class, default address #0 (A0-A2 not jumpered)
 Adafruit_LiquidCrystal lcd(0);
 
+// Initialize motor driver class (dependent on driver version).
+G2Motor18v18 md = G2Motor18v18(PIN_nSLEEP, PIN_DIR, PIN_PWM, PIN_nFAULT, PIN_CS);
+
 // At startup...
 void setup() {
-	// Set motor pins as output.
-	pinMode(PIN_MOTOR_SCREW, OUTPUT);
+	// Initialize motor pins,  pause for calibration.
+	md.init();
+	
+	// Calibrate current measurement and pause for completion.
+	md.calibrateCurrentOffset();
+	delay(10);
+	
+	// Disable sleep mode and give the driver time to respond.
+	md.enableDriver();
+	delay(1);
 	
 	// Set up serial port (with baud rate).
 	Serial.begin(115200);
@@ -34,15 +53,15 @@ void setup() {
 	lcd.print("SPEED    Current");
 
 	// Print settings.
-	AdjustSetting(PIN_MOTOR_SCREW, &speed, 0, LCD_COL_SCREW, 1);
+	AdjustSetting(&speed, 0);
 	
 	// Set encoder pins as inputs with pull up resistors.
 	pinMode(PIN_ENCODER_CLK, INPUT_PULLUP);
 	pinMode(PIN_ENCODER_DT, INPUT_PULLUP);
 	
-	// Call updateEncoder when any high/low changed seen on pins 2 or 3.
-	attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_CLK), updateEncoder, CHANGE);
-	attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_DT), updateEncoder, CHANGE);
+	// Call UpdateEncoder when any high/low changed seen on pins 2 or 3.
+	attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_CLK), UpdateEncoder, CHANGE);
+	attachInterrupt(digitalPinToInterrupt(PIN_ENCODER_DT), UpdateEncoder, CHANGE);
 }
 
 // Over and over...
@@ -50,15 +69,47 @@ void loop() {
 	// If the encoder has turned...
 	if (change != 0) {
 		// Adjust motor speed.
-		Serial.print("Screw = ");
-		AdjustSetting(PIN_MOTOR_SCREW, &speed, change, LCD_COL_SCREW, 1);
+		AdjustSetting(&speed, change);
 		
 		// Reset flag.
 		change = 0;
 	}
+
+	// Every so often...
+	if (millis() >= timestamp + 1000) {
+        timestamp += 1000;
+        
+		// If there is a motor fault...
+		if (md.getFault()) {
+			// Disable the motor and give the driver time to respond.
+			md.disableDriver();
+			delay(1);
+			
+			// Alert the user.
+			lcd.setCursor(0, 0);
+			lcd.print("Motor fault");
+			Serial.println("Motor fault");
+	
+			// Wait for reset.
+			while (1);
+		}
+	
+		// Measure motor current.
+		int current = md.getCurrentMilliamps();
+		Serial.print("current = ");
+		Serial.println(current);
+		
+		// Clear the display
+		lcd.setCursor(LCD_COL_CURRENT, 1);
+		lcd.print("    ");
+		
+		// Print the current.
+		lcd.setCursor(LCD_COL_CURRENT, 1);
+		lcd.print(current);
+	}
 }
 
-void AdjustSetting(int pin, int *setting, int adjustment, int column, int row) {
+void AdjustSetting(int *setting, int adjustment) {
 	// Change speed.
 	*setting += adjustment;
 
@@ -66,24 +117,27 @@ void AdjustSetting(int pin, int *setting, int adjustment, int column, int row) {
 	if (*setting > SPEED_MAX) { *setting = SPEED_MAX; }
 	else if (*setting < SPEED_MIN) { *setting = SPEED_MIN; }
 
-	int pwm = map(*setting, 0, SPEED_MAX, 0, 255);
+	// Scale appropriately.
+	int pwm = map(*setting, 0, SPEED_MAX, 0, 400);
 
-	// Update PWM (and scale appropriately).
-	analogWrite(pin, pwm);
+	// Update PWM.
+	md.setSpeed(pwm);
 
 	// Print setting to serial port and LCD.
+	Serial.print("PWM = ");
 	Serial.println(pwm);
 
 	// Clear the display
-	lcd.setCursor(column, row);
+	lcd.setCursor(LCD_COL_SPEED, 1);
 	lcd.print("    ");
 
 	// Print number.
-	lcd.setCursor(column, row);
+	lcd.setCursor(LCD_COL_SPEED, 1);
 	lcd.print(*setting);
 }
 
-void updateEncoder() {
+// When the rotary encoder is turned...
+void UpdateEncoder() {
 	// Remember the state between interrupts.
 	static uint8_t state = 0;
 	
