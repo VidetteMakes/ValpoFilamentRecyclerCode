@@ -1,10 +1,5 @@
 #pragma once
 
-#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || \
-    defined(__AVR_ATmega328PB__) || defined (__AVR_ATmega32U4__)
-  #define G2MOTOR_TIMER1_AVAILABLE
-#endif
-
 #include <Arduino.h>
 
 class G2Motor

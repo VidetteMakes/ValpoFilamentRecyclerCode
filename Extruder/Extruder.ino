@@ -12,7 +12,7 @@ const int PIN_nSLEEP = 4;				// motor driver enable
 const int PIN_nFAULT = 6;				// motor fault detection
 const int PIN_DIR = 7;					// motor direction control
 const int PIN_PWM = 9;					// motor speed control
-const int PIN_CS = A0;					// motor current measurement
+const int PIN_CS = A0;					// motor current measurements
 
 const int LCD_COL_SPEED = 1;			// LCD motor speed location
 const int LCD_COL_CURRENT = 9;			// LCD current location
@@ -53,7 +53,7 @@ void setup() {
 	lcd.print("SPEED    Current");
 
 	// Print settings.
-	AdjustSetting(&speed, 0);
+	AdjustSetting(speed);
 	
 	// Set encoder pins as inputs with pull up resistors.
 	pinMode(PIN_ENCODER_CLK, INPUT_PULLUP);
@@ -68,8 +68,15 @@ void setup() {
 void loop() {
 	// If the encoder has turned...
 	if (change != 0) {
-		// Adjust motor speed.
-		AdjustSetting(&speed, change);
+		// Change speed.
+		speed += change;
+	
+		// Bound at min and max.
+		if (speed > SPEED_MAX) { speed = SPEED_MAX; }
+		else if (speed < SPEED_MIN) { speed = SPEED_MIN; }
+	
+		// Update motor speed.
+		AdjustSetting(speed);
 		
 		// Reset flag.
 		change = 0;
@@ -77,6 +84,7 @@ void loop() {
 
 	// Every so often...
 	if (millis() >= timestamp + 1000) {
+		// Remember the time.
         timestamp += 1000;
         
 		// If there is a motor fault...
@@ -99,7 +107,7 @@ void loop() {
 		Serial.print("current = ");
 		Serial.println(current);
 		
-		// Clear the display
+		// Clear the display.
 		lcd.setCursor(LCD_COL_CURRENT, 1);
 		lcd.print("    ");
 		
@@ -109,16 +117,9 @@ void loop() {
 	}
 }
 
-void AdjustSetting(int *setting, int adjustment) {
-	// Change speed.
-	*setting += adjustment;
-
-	// Bound at min and max.
-	if (*setting > SPEED_MAX) { *setting = SPEED_MAX; }
-	else if (*setting < SPEED_MIN) { *setting = SPEED_MIN; }
-
+void AdjustSetting(int setting) {
 	// Scale appropriately.
-	int pwm = map(*setting, 0, SPEED_MAX, 0, 400);
+	int pwm = map(setting, 0, SPEED_MAX, 0, 400);
 
 	// Update PWM.
 	md.setSpeed(pwm);
@@ -127,13 +128,13 @@ void AdjustSetting(int *setting, int adjustment) {
 	Serial.print("PWM = ");
 	Serial.println(pwm);
 
-	// Clear the display
+	// Clear the display.
 	lcd.setCursor(LCD_COL_SPEED, 1);
 	lcd.print("    ");
 
-	// Print number.
+	// Print the speed.
 	lcd.setCursor(LCD_COL_SPEED, 1);
-	lcd.print(*setting);
+	lcd.print(pwm);
 }
 
 // When the rotary encoder is turned...

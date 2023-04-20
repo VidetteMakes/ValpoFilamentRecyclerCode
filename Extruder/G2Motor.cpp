@@ -30,22 +30,6 @@ void G2Motor::init()
 	pinMode(_nFAULT, INPUT_PULLUP);
 	pinMode(_CS, INPUT);
 	pinMode(_DIR, OUTPUT);
-
-#ifdef G2MOTOR_TIMER1_AVAILABLE
-	if (_PWM == _PWM_TIMER1_PIN && _PWM == _PWM_TIMER1_PIN) {
-		// Timer 1 configuration
-		// prescaler: clockI/O / 1
-		// outputs enabled
-		// phase-correct PWM
-		// top of 400
-		//
-		// PWM frequency calculation
-		// 16MHz / 1 (prescaler) / 2 (phase-correct) / 400 (top) = 20kHz
-		TCCR1A = 0b10100000;
-		TCCR1B = 0b00010001;
-		ICR1 = 400;
-	}
-#endif
 }
 
 // Set speed for motor, speed is a number betwenn -400 and 400
@@ -59,18 +43,7 @@ void G2Motor::setSpeed(int speed) {
 	if (speed > 400)  // Max PWM dutycycle
 		speed = 400;
 
-#ifdef G2MOTOR_TIMER1_AVAILABLE
-	if (_PWM == _PWM_TIMER1_PIN && _PWM == _PWM_TIMER1_PIN)
-	{
-		OCR1A = speed;
-	}
-	else
-	{
-		analogWrite(_PWM, speed * 51 / 80); // map 400 to 255
-	}
-#else
 	analogWrite(_PWM, speed * 51 / 80); // map 400 to 255
-#endif
 
 	// flip if speed was negative or _flip setting is active, but not both
 	if (reverse ^ _flip)
