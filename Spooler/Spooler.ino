@@ -17,8 +17,8 @@ const int C3 = 9;						// pin for keypad column 3
 
 #include "keypad_config.h"				// leave after pin definitions
 
-const int LCD_COL_FANS = 1;				// location of fan speed
-const int LCD_COL_SPOOL = 13;			// location of spool speed
+const int LCD_COL_FANS = 13;			// location of fan speed
+const int LCD_COL_SPOOL = 1;			// location of spool speed
 
 const int SPEED_MAX = 10;				// max allowed speed
 
@@ -48,7 +48,7 @@ void setup() {
 
 	// Print placeholding text on the display.
 	lcd.setCursor(0, 0);
-	lcd.print("FANS       SPOOL");
+	lcd.print("SPOOL       FANS");
 
 	// Print settings.
 	AdjustSetting(PIN_MOTOR_FANS, &speedFans, 0, LCD_COL_FANS, 1);
@@ -70,25 +70,27 @@ void loop() {
 			switch (e.bit.KEY) {
 			// If button 1 is pressed...
 			case '1':
-				// Increase fan speed.
-				Serial.print("Fans = ");
-				AdjustSetting(PIN_MOTOR_FANS, &speedFans, 1, LCD_COL_FANS, 1);
-				break;
-			// If button 2 is pressed...
-			case '2':
-				// Decrease fan speed.
-				Serial.print("Fans = ");
-				AdjustSetting(PIN_MOTOR_FANS, &speedFans, -1, LCD_COL_FANS, 1);
-				break;
-			case '3':
 				// Increase spool speed.
 				Serial.print("Spool = ");
 				AdjustSetting(PIN_MOTOR_SPOOL, &speedSpool, 1, LCD_COL_SPOOL, 1);
 				break;
-			case '4':
+			// If button 2 is pressed...
+			case '2':
 				// Decrease spool speed.
 				Serial.print("Spool = ");
 				AdjustSetting(PIN_MOTOR_SPOOL, &speedSpool, -1, LCD_COL_SPOOL, 1);
+				break;
+			// If button 3 is pressed...
+			case '3':
+				// Increase fan speed.
+				Serial.print("Fans = ");
+				AdjustSetting(PIN_MOTOR_FANS, &speedFans, 1, LCD_COL_FANS, 1);
+				break;
+			// If button 4 is pressed...
+			case '4':
+				// Decrease fan speed.
+				Serial.print("Fans = ");
+				AdjustSetting(PIN_MOTOR_FANS, &speedFans, -1, LCD_COL_FANS, 1);
 				break;
 			}
 		}
